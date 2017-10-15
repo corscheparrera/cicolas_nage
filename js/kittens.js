@@ -34,6 +34,7 @@ var PLAYER_HEIGHT = 84;
 // These two constants keep us from using "magic numbers" in our code
 var LEFT_ARROW_CODE = 37;
 var RIGHT_ARROW_CODE = 39;
+var R_KEY_CODE = 82;
 
 // These two constants allow us to DRY
 var MOVE_LEFT = "left";
@@ -226,22 +227,29 @@ class Engine {
         this.setupEnemies();
 
         // Check if player is dead
+
         if (this.player.isDead(this.enemies) && this.player.sprite !== images["player_dead.png"]) {
             // If they are dead, then it's game over!
-            this.player.sprite = images["player_dead.png"];
-            this.player.render(this.ctx);
-            setTimeout(this.getConfirmation, 1000);
-        }
-        if (!this.player.isDead(this.enemies) && this.player.sprite === images["player_dead.png"]) {
             this.ctx.font = "bold 30px Impact";
-            this.ctx.fillStyle = "#ffffff";
+            this.ctx.fillStyle = "#e73827";
             this.ctx.fillText(this.score + " GAME OVER", 5, 30);
+            this.ctx.fillText('PRESS "R" TO RESTART', 5, 200);
+            document.addEventListener("keydown", e => {
+                if (e.keyCode === R_KEY_CODE /*&& isPlayerDead()*/) {
+                    this.player = new Player();
+                    this.enemies = [];
+                    this.setupEnemies();
+                    // this.start();
+                    this.score = 0;
+                    this.lastFrame = Date.now();
+                    this.gameLoop();
+                }
+            });
         } else {
             // If player is not dead, then draw the score
             this.ctx.font = "bold 30px Impact";
             this.ctx.fillStyle = "#ffffff";
             this.ctx.fillText(this.score, 5, 30);
-
             // Set the time marker and redraw
             this.lastFrame = Date.now();
             requestAnimationFrame(this.gameLoop);
