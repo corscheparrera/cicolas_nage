@@ -96,15 +96,6 @@ class Player extends Entity {
             this.playerColumn = this.playerColumn + 1;
         }
     }
-    isDead(ennemies) {
-        var isDead = false;
-        ennemies.forEach(enemy => {
-            if (enemy && enemy.y + ENEMY_HEIGHT > this.y && enemy.enemyColumn === this.playerColumn) {
-                isDead = true;
-            }
-        });
-        return isDead;
-    }
 }
 
 /*
@@ -259,14 +250,15 @@ class Engine {
         this.setupEnemies();
 
         // Check if player is dead
-        if (this.player.isDead(this.enemies) && this.player.sprite !== images["player_dead.png"]) {
+        if (this.isDead(this.enemies) && this.player.sprite !== images["player_dead.png"]) {
             this.player.sprite = images["player_dead.png"];
             this.player.render(this.ctx);
             this.lastFrame = Date.now();
             this.gameLoop();
         }
-        if (this.player.isDead(this.enemies) && this.player.sprite === images["player_dead.png"]) {
+        if (this.isDead(this.enemies) && this.player.sprite === images["player_dead.png"]) {
             // If they are dead, then it's game over!
+
             this.ctx.font = "bold 25px Helvetica";
             this.ctx.fillStyle = "#B10DC9";
             this.ctx.fillText(this.score + " GAME OVER", GAME_WIDTH / 2, 100);
@@ -286,6 +278,7 @@ class Engine {
             });
         } else {
             // If player is not dead, then draw the score
+            this.ctx.fillText("Lives: " + this.player.playerLives, 65, 55); //display lives
             this.ctx.font = "bold 30px Helvetica";
             this.ctx.fillStyle = "#B10DC9";
             this.ctx.fillText(this.score, 60, 30);
@@ -293,6 +286,20 @@ class Engine {
             this.lastFrame = Date.now();
             requestAnimationFrame(this.gameLoop);
         }
+    }
+    isDead(ennemies) {
+        var isDead = false;
+        ennemies.forEach((enemy, enemyIdx) => {
+            if (enemy && enemy.y + ENEMY_HEIGHT > this.player.y && enemy.enemyColumn === this.player.playerColumn) {
+                this.player.changeLives(-1);
+                delete this.enemies[enemyIdx];
+            }
+        });
+        //until lives become 0, the game ends.
+        if (this.player.playerLives === 0) {
+            isDead = true;
+        }
+        return isDead;
     }
 }
 
