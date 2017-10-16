@@ -29,6 +29,7 @@ var ceiling = 3;
 function PerformCalc() {
     if (up == true && MAX_ENEMIES <= ceiling) {
         MAX_ENEMIES += increment;
+        this.player.level += increment;
 
         if (MAX_ENEMIES == ceiling) {
             up = false;
@@ -58,6 +59,7 @@ class Entity {
         ctx.drawImage(this.sprite, this.x, this.y);
     }
 }
+
 class Enemy extends Entity {
     constructor(xPos) {
         super();
@@ -83,6 +85,7 @@ class Player extends Entity {
         this.playerColumn = 2;
         // add var for player lives
         this.playerLives = 3;
+        this.level = 1;
     }
 
     // live functions
@@ -110,6 +113,7 @@ This section is a tiny game engine.
 This engine will use your Enemy and Player classes to create the behavior of the game.
 The engine will try to draw your game at 60 frames per second using the requestAnimationFrame function
 */
+
 class Engine {
     constructor(element) {
         // Flag for state of player (dead or alive)
@@ -155,7 +159,6 @@ class Engine {
     // This method finds a random spot where there is no enemy, and puts one in there
     addEnemy() {
         var enemySpots = GAME_WIDTH / ENEMY_WIDTH; /* 375 ÷ 75 = 5 DONC 5 colonnes sur l'axe des X pr avoir un enemy*/
-
         var enemySpot;
 
         // Keep looping until we find a free enemy spot at random
@@ -208,6 +211,8 @@ class Engine {
     }
     // Draw the canvas
     loadGameBackground() {
+        /* Let's play a intro for one second. */
+
         this.score = 0;
         this.lastFrame = Date.now();
         this.ctx.drawImage(images["stars.png"], 0, 0); // draw the star bg
@@ -264,7 +269,7 @@ class Engine {
             // If they are dead, then it's game over!
 
             document.getElementById("restart").className = "animated fadeInDown";
-            this.ctx.fillText(this.score, 30, 40);
+            this.ctx.fillText("Score: " + this.score, 30, 40);
             document.addEventListener("keydown", e => {
                 if (e.keyCode === R_KEY_CODE) {
                     this.player = new Player();
@@ -280,10 +285,11 @@ class Engine {
             });
         } else {
             // If player is not dead, then draw the score
-            this.ctx.fillText("Lives: " + this.player.playerLives, 30, 70); //display lives
-            this.ctx.font = "bold 30px Helvetica";
+            this.ctx.fillText("Lives: " + this.player.playerLives, 280, 40); //display lives
+            this.ctx.font = "bold 20px Helvetica";
             this.ctx.fillStyle = "#B10DC9";
-            this.ctx.fillText(this.score, 30, 40);
+            this.ctx.fillText("Score: " + this.score, 25, 40);
+            this.ctx.fillText("Level: " + this.player.level, 150, 40);
             // Set the time marker and redraw
             this.lastFrame = Date.now();
             requestAnimationFrame(this.gameLoop);

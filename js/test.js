@@ -19,7 +19,7 @@ var MOVE_RIGHT = "right";
 
 // Preload game images
 var images = {};
-["enemy.png", "stars.png", "player.png"].forEach(imgName => {
+["enemy.png", "stars.png", "player.png", "oscar.png"].forEach(imgName => {
     var img = document.createElement("img");
     img.src = "images/" + imgName;
     images[imgName] = img;
@@ -51,7 +51,26 @@ class Enemy extends Entity {
         ctx.drawImage(this.sprite, this.x, this.y);
     }*/
 }
+// This section is where you will be doing most of your coding
+class Oscar extends Entity {
+    constructor(xPos) {
+        super();
+        this.x = xPos;
+        this.y = -ENEMY_HEIGHT;
+        this.sprite = images["oscar.png"];
 
+        // Each enemy should have a different speed
+        this.speed = Math.random() / 2 + 0.25;
+    }
+
+    update(timeDiff) {
+        this.y = this.y + timeDiff * this.speed;
+    }
+
+    /*render(ctx) {
+        ctx.drawImage(this.sprite, this.x, this.y);
+    }*/
+}
 class Player extends Entity {
     constructor() {
         super();
@@ -93,7 +112,7 @@ class Engine {
 
         // Setup enemies, making sure there are always three
         this.setupEnemies();
-
+        this.setupOscar();
         // Setup the <canvas> element where we will be drawing
         var canvas = document.createElement("canvas");
         canvas.width = GAME_WIDTH;
@@ -120,6 +139,16 @@ class Engine {
         }
     }
 
+    setupOscar() {
+        if (!this.oscar) {
+            this.oscar = [];
+        }
+
+        while (this.oscar.filter(e => !!e).length < 1) {
+            this.addOscar();
+        }
+    }
+
     // This method finds a random spot where there is no enemy, and puts one in there
     addEnemy() {
         var enemySpots = GAME_WIDTH / ENEMY_WIDTH;
@@ -132,7 +161,16 @@ class Engine {
 
         this.enemies[enemySpot] = new Enemy(enemySpot * ENEMY_WIDTH);
     }
+    addOscar() {
+        var oscarSpots = GAME_WIDTH / ENEMY_WIDTH;
+        var oscarSpot;
+        // Keep looping until we find a free enemy spot at random
+        while (!oscarSpot && this.enemies[oscarSpot]) {
+            oscarSpot = Math.floor(Math.random() * oscarSpots);
+        }
 
+        this.oscar[oscarSpot] = new Oscar(oscarSpot * ENEMY_WIDTH);
+    }
     // This method kicks off the game
     start() {
         this.score = 0;
