@@ -10,6 +10,7 @@ var PLAYER_HEIGHT = 84;
 var LEFT_ARROW_CODE = 37;
 var RIGHT_ARROW_CODE = 39;
 var R_KEY_CODE = 82;
+var ENTER_KEY = 13;
 
 // These two constants allow us to DRY
 var MOVE_LEFT = "left";
@@ -41,7 +42,7 @@ setInterval(PerformCalc, 10000);
 
 // Preload game images
 var images = {};
-["enemy.png", "stars.png", "player.png", "player_dead.png"].forEach(imgName => {
+["enemy.png", "stars.png", "player.png", "player_dead.png", "cage.png"].forEach(imgName => {
     var img = document.createElement("img");
     img.src = "images/" + imgName;
     images[imgName] = img;
@@ -76,10 +77,15 @@ class Player extends Entity {
         this.y = GAME_HEIGHT - PLAYER_HEIGHT - 10;
         this.sprite = images["player.png"];
         this.playerColumn = 2;
+        // add var for player lives
+        this.playerLives = 3;
     }
-    kill() {
-        this.sprite = images["player_dead.png"];
+
+    // live functions
+    changeLives(change) {
+        this.playerLives += change;
     }
+
     // This method is called by the game engine when left/right arrows are pressed
     move(direction) {
         if (direction === MOVE_LEFT && this.x > 0) {
@@ -108,6 +114,20 @@ The engine will try to draw your game at 60 frames per second using the requestA
 */
 class Engine {
     constructor(element) {
+        // Flag for state of player (dead or alive)
+        this.playerDead = true;
+        // listen for ENTER_KEY to restart game upon death.
+        document.addEventListener("keydown", e => {
+            if (e.keyCode === ENTER_KEY && this.playerDead) {
+                this.start();
+            }
+        });
+
+        document.addEventListener("keydown", e => {
+            if (e.keyCode === ENTER_KEY && this.playerDead) {
+                this.start();
+            }
+        });
         // Setup the player
         this.player = new Player();
 
@@ -167,8 +187,17 @@ class Engine {
 
     // This method kicks off the game
     start() {
+        // Setup the player
+        this.player = new Player();
+        // Flag for state of player (dead or alive)
+        this.playerDead = false;
+
+        this.enemies = [];
+        this.setupEnemies();
+
         this.score = 0;
         this.lastFrame = Date.now();
+        this.gameLoop();
 
         // Listen for keyboard left/right and update the player
         document.addEventListener("keydown", e => {
@@ -178,8 +207,20 @@ class Engine {
                 this.player.move(MOVE_RIGHT);
             }
         });
-
-        this.gameLoop();
+    }
+    // Draw the canvas
+    loadGameBackground() {
+        this.score = 0;
+        this.lastFrame = Date.now();
+        this.ctx.drawImage(images["stars.png"], 0, 0); // draw the star bg
+        this.ctx.drawImage(images["cage.png"], 0, 75);
+        this.ctx.textAlign = "center";
+        this.ctx.font = "bold 30px Helvetica";
+        this.ctx.fillStyle = "#B10DC9";
+        this.ctx.fillText("(press ENTER to play)", GAME_WIDTH / 2, 200);
+        if (this.playerDead) {
+            requestAnimationFrame(() => this.loadGameBackground());
+        }
     }
 
     /*
@@ -226,16 +267,18 @@ class Engine {
         }
         if (this.player.isDead(this.enemies) && this.player.sprite === images["player_dead.png"]) {
             // If they are dead, then it's game over!
-            this.ctx.font = "bold 30px Impact";
-            this.ctx.fillStyle = "#e73827";
-            this.ctx.fillText(this.score + " GAME OVER", 5, 30);
-            this.ctx.fillText('PRESS "R" TO RESTART', 5, 200);
+            this.ctx.font = "bold 25px Helvetica";
+            this.ctx.fillStyle = "#B10DC9";
+            this.ctx.fillText(this.score + " GAME OVER", GAME_WIDTH / 2, 100);
+            this.ctx.fillText('PRESS "R" TO RESTART', GAME_WIDTH / 2, 150);
             document.addEventListener("keydown", e => {
-                if (e.keyCode === R_KEY_CODE /*&& isPlayerDead()*/) {
+                if (e.keyCode === R_KEY_CODE) {
                     this.player = new Player();
                     this.enemies = [];
                     this.setupEnemies();
+
                     // this.start();
+                    var MAX_ENEMIES = 1;
                     this.score = 0;
                     this.lastFrame = Date.now();
                     this.gameLoop();
@@ -243,9 +286,9 @@ class Engine {
             });
         } else {
             // If player is not dead, then draw the score
-            this.ctx.font = "bold 30px Impact";
-            this.ctx.fillStyle = "#ffffff";
-            this.ctx.fillText(this.score, 5, 30);
+            this.ctx.font = "bold 30px Helvetica";
+            this.ctx.fillStyle = "#B10DC9";
+            this.ctx.fillText(this.score, 60, 30);
             // Set the time marker and redraw
             this.lastFrame = Date.now();
             requestAnimationFrame(this.gameLoop);
@@ -254,5 +297,6 @@ class Engine {
 }
 
 // This section will start the game
+// This section will start the game
 var gameEngine = new Engine(document.getElementById("app"));
-gameEngine.start();
+requestAnimationFrame(() => gameEngine.loadGameBackground());
