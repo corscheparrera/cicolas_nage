@@ -1,9 +1,12 @@
 {
-    "name": "Nicolas Cage",
-    "version": "1.0.0",
-    "description": "Nicolas Cage.",
-    "main": "index.js",
-    "author": "Maxime Lussier",
-    "license": "ISC",
-    "devDependencies": {}
+  "name": "Nicolas Cage",
+  "version": "1.0.0",
+  "description": "Nicolas Cage.",
+  "main": "index.js",
+  "author": "Maxime Lussier",
+  "license": "ISC",
+  "devDependencies": {},
+  "dependencies": {
+    "animate.css": "^3.5.2"
+  }
 }

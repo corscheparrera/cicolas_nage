@@ -11,10 +11,14 @@ var LEFT_ARROW_CODE = 37;
 var RIGHT_ARROW_CODE = 39;
 var R_KEY_CODE = 82;
 var ENTER_KEY = 13;
+var UP_ARROW_CODE = 38;
+var DOWN_ARROW_CODE = 40;
 
 // These two constants allow us to DRY
 var MOVE_LEFT = "left";
 var MOVE_RIGHT = "right";
+var MOVE_UP = "up";
+var MOVE_DOWN = "down";
 
 // Add gradually ennemies until there are 3
 var up = true;
@@ -94,10 +98,13 @@ class Player extends Entity {
         } else if (direction === MOVE_RIGHT && this.x < GAME_WIDTH - PLAYER_WIDTH) {
             this.x = this.x + PLAYER_WIDTH;
             this.playerColumn = this.playerColumn + 1;
+        } else if (direction === MOVE_UP && this.y > 0) {
+            this.y = this.y - PLAYER_HEIGHT;
+        } else if (direction === MOVE_DOWN && this.y < GAME_HEIGHT - PLAYER_HEIGHT) {
+            this.y = this.y + PLAYER_HEIGHT;
         }
     }
 }
-
 /*
 This section is a tiny game engine.
 This engine will use your Enemy and Player classes to create the behavior of the game.
@@ -108,12 +115,6 @@ class Engine {
         // Flag for state of player (dead or alive)
         this.playerDead = true;
         // listen for ENTER_KEY to restart game upon death.
-        document.addEventListener("keydown", e => {
-            if (e.keyCode === ENTER_KEY && this.playerDead) {
-                this.start();
-            }
-        });
-
         document.addEventListener("keydown", e => {
             if (e.keyCode === ENTER_KEY && this.playerDead) {
                 this.start();
@@ -178,6 +179,8 @@ class Engine {
 
     // This method kicks off the game
     start() {
+        document.getElementById("enter").className = "hide";
+
         // Setup the player
         this.player = new Player();
         // Flag for state of player (dead or alive)
@@ -196,6 +199,10 @@ class Engine {
                 this.player.move(MOVE_LEFT);
             } else if (e.keyCode === RIGHT_ARROW_CODE) {
                 this.player.move(MOVE_RIGHT);
+            } else if (e.keyCode === UP_ARROW_CODE) {
+                this.player.move(MOVE_UP);
+            } else if (e.keyCode === DOWN_ARROW_CODE) {
+                this.player.move(MOVE_DOWN);
             }
         });
     }
@@ -205,10 +212,6 @@ class Engine {
         this.lastFrame = Date.now();
         this.ctx.drawImage(images["stars.png"], 0, 0); // draw the star bg
         this.ctx.drawImage(images["cage.png"], 0, 75);
-        this.ctx.textAlign = "center";
-        this.ctx.font = "bold 30px Helvetica";
-        this.ctx.fillStyle = "#B10DC9";
-        this.ctx.fillText("(press ENTER to play)", GAME_WIDTH / 2, 200);
         if (this.playerDead) {
             requestAnimationFrame(() => this.loadGameBackground());
         }
@@ -226,6 +229,7 @@ class Engine {
      */
 
     gameLoop() {
+        document.getElementById("restart").className = "hide";
         // Check how long it's been since last frame
         var currentFrame = Date.now();
         var timeDiff = currentFrame - this.lastFrame;
@@ -259,18 +263,16 @@ class Engine {
         if (this.isDead(this.enemies) && this.player.sprite === images["player_dead.png"]) {
             // If they are dead, then it's game over!
 
-            this.ctx.font = "bold 25px Helvetica";
-            this.ctx.fillStyle = "#B10DC9";
-            this.ctx.fillText(this.score + " GAME OVER", GAME_WIDTH / 2, 100);
-            this.ctx.fillText('PRESS "R" TO RESTART', GAME_WIDTH / 2, 150);
+            document.getElementById("restart").className = "animated fadeInDown";
+            this.ctx.fillText(this.score, 30, 40);
             document.addEventListener("keydown", e => {
                 if (e.keyCode === R_KEY_CODE) {
                     this.player = new Player();
                     this.enemies = [];
                     this.setupEnemies();
 
-                    // this.start();
-                    var MAX_ENEMIES = 1;
+                    // this.start();r
+                    MAX_ENEMIES = 1;
                     this.score = 0;
                     this.lastFrame = Date.now();
                     this.gameLoop();
@@ -278,10 +280,10 @@ class Engine {
             });
         } else {
             // If player is not dead, then draw the score
-            this.ctx.fillText("Lives: " + this.player.playerLives, 65, 55); //display lives
+            this.ctx.fillText("Lives: " + this.player.playerLives, 30, 70); //display lives
             this.ctx.font = "bold 30px Helvetica";
             this.ctx.fillStyle = "#B10DC9";
-            this.ctx.fillText(this.score, 60, 30);
+            this.ctx.fillText(this.score, 30, 40);
             // Set the time marker and redraw
             this.lastFrame = Date.now();
             requestAnimationFrame(this.gameLoop);

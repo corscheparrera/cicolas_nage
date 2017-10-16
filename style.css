@@ -1,0 +1,35 @@
+#container {
+    width: 375px;
+    height: 500px;
+    position: relative;
+}
+
+#restart,
+#enter {
+    position: absolute;
+
+    color: red;
+    font-size: 35px;
+    font-family: Helvetica;
+    font-weight: bold;
+    z-index: 10;
+    color: #b10dc9;
+    text-align: center;
+}
+#enter {
+    top: 120px;
+    left: 20px;
+}
+#restart {
+    top: 220px;
+    left: 40px;
+}
+#app {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+.hide {
+    display: none;
+}
