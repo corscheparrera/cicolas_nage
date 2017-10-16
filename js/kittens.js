@@ -29,7 +29,6 @@ var ceiling = 3;
 function PerformCalc() {
     if (up == true && MAX_ENEMIES <= ceiling) {
         MAX_ENEMIES += increment;
-        this.player.level += increment;
 
         if (MAX_ENEMIES == ceiling) {
             up = false;
@@ -47,7 +46,7 @@ setInterval(PerformCalc, 10000);
 
 // Preload game images
 var images = {};
-["enemy.png", "stars.png", "player.png", "player_dead.png", "cage.png"].forEach(imgName => {
+["enemy.png", "stars.png", "player.png", "player_dead.png", "cage.png", "oscar.png"].forEach(imgName => {
     var img = document.createElement("img");
     img.src = "images/" + imgName;
     images[imgName] = img;
@@ -87,7 +86,9 @@ class Player extends Entity {
         this.playerLives = 3;
         this.level = 1;
     }
-
+    changeLevel() {
+        this.level = MAX_ENEMIES === 1 ? 1 : MAX_ENEMIES === 2 ? 2 : MAX_ENEMIES === 3 ? 3 : "there is prob";
+    }
     // live functions
     changeLives(change) {
         this.playerLives += change;
@@ -244,7 +245,7 @@ class Engine {
 
         // Call update on all enemies
         this.enemies.forEach(enemy => enemy.update(timeDiff));
-
+        this.player.changeLevel();
         // Draw everything!
         this.ctx.drawImage(images["stars.png"], 0, 0); // draw the star bg
         this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the enemies
@@ -258,7 +259,6 @@ class Engine {
         });
         this.setupEnemies();
 
-        // Check if player is dead
         if (this.isDead(this.enemies) && this.player.sprite !== images["player_dead.png"]) {
             this.player.sprite = images["player_dead.png"];
             this.player.render(this.ctx);
@@ -270,6 +270,7 @@ class Engine {
 
             document.getElementById("restart").className = "animated fadeInDown";
             this.ctx.fillText("Score: " + this.score, 30, 40);
+            this.ctx.fillText("Level: " + this.player.level, 280, 40);
             document.addEventListener("keydown", e => {
                 if (e.keyCode === R_KEY_CODE) {
                     this.player = new Player();
@@ -289,7 +290,7 @@ class Engine {
             this.ctx.font = "bold 20px Helvetica";
             this.ctx.fillStyle = "#B10DC9";
             this.ctx.fillText("Score: " + this.score, 25, 40);
-            this.ctx.fillText("Level: " + this.player.level, 150, 40);
+            this.ctx.fillText("Level: " + this.player.level, 160, 40);
             // Set the time marker and redraw
             this.lastFrame = Date.now();
             requestAnimationFrame(this.gameLoop);
